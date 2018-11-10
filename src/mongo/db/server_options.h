@@ -253,6 +253,8 @@ struct ServerGlobalParams {
     std::vector<std::string> disabledSecureAllocatorDomains;
 
     bool enableMajorityReadConcern = true;
+
+    std::string ftsDictDir = "";
 };
 
 extern ServerGlobalParams serverGlobalParams;

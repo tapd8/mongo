@@ -1182,6 +1182,11 @@ Status storeMongodOptions(const moe::Environment& params) {
                                     << " and set skipShardingConfigurationChecks=true");
     }
 
+    if (params.count("fts.dictDir")) {
+        auto dir = params["fts.dictDir"].as<std::string>();
+        serverGlobalParams.ftsDictDir = dir;
+    }
+
     setGlobalReplSettings(replSettings);
     return Status::OK();
 }

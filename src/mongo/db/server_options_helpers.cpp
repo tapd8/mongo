@@ -228,6 +228,12 @@ Status addBaseServerOptions(moe::OptionSection* options) {
                                "Desired format for timestamps in log messages. One of ctime, "
                                "iso8601-utc or iso8601-local");
 
+    options->addOptionChaining("fts.dictDir",
+                               "ftsDictDir",
+                               moe::String,
+                               "fulltext search dict dir, mainly for chinese");
+
+
     options
         ->addOptionChaining(
             "setParameter", "setParameter", moe::StringMap, "Set a configurable parameter")

@@ -1,0 +1,36 @@
+systemLog:
+    verbosity: 0
+    path: /home/wolf/mongo/log/mongod.log
+    logAppend: true
+    logRotate: rename
+    destination: file
+    timeStampFormat: ctime
+
+processManagement:
+    fork: true
+    pidFilePath: /home/wolf/mongo/db/mongod.pid
+
+net:
+    port: 37001
+
+#security:
+#    keyFile: /data/home/deyukong/mongodb/conf/keyfile
+
+storage:
+    dbPath: /home/wolf/mongo/db/
+    directoryPerDB: true
+    syncPeriodSecs: 60
+    wiredTiger:
+        engineConfig:
+            cacheSizeGB: 2
+
+replication:
+    oplogSizeMB: 1024
+    replSetName: test
+
+sharding:
+    clusterRole: shardsvr
+    archiveMovedChunks: false
+
+fts:
+    dictDir: /home/wolf/mongo

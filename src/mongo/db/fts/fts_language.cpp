@@ -37,6 +37,7 @@
 #include "mongo/base/init.h"
 #include "mongo/db/fts/fts_basic_phrase_matcher.h"
 #include "mongo/db/fts/fts_basic_tokenizer.h"
+#include "mongo/db/fts/fts_chinese_tokenizer.h"
 #include "mongo/db/fts/fts_unicode_phrase_matcher.h"
 #include "mongo/db/fts/fts_unicode_tokenizer.h"
 #include "mongo/stdx/memory.h"
@@ -112,7 +113,8 @@ MONGO_INITIALIZER_GROUP(FTSAllLanguagesRegistered, MONGO_NO_PREREQUISITES, MONGO
     MONGO_FTS_LANGUAGE_DECL(Russian, "russian", "ru")       \
     MONGO_FTS_LANGUAGE_DECL(Spanish, "spanish", "es")       \
     MONGO_FTS_LANGUAGE_DECL(Swedish, "swedish", "sv")       \
-    MONGO_FTS_LANGUAGE_DECL(Turkish, "turkish", "tr")
+    MONGO_FTS_LANGUAGE_DECL(Turkish, "turkish", "tr")       \
+    MONGO_FTS_LANGUAGE_DECL(Chinese, "chinese", "cn")
 
 
 // Declare compilation unit local language object.
@@ -228,6 +230,7 @@ MONGO_FTS_LANGUAGE_DECLARE(languageSwedishV1, "swedish", TEXT_INDEX_VERSION_1);
 MONGO_FTS_LANGUAGE_DECLARE(languageTrV1, "tr", TEXT_INDEX_VERSION_1);
 MONGO_FTS_LANGUAGE_DECLARE(languageTurV1, "tur", TEXT_INDEX_VERSION_1);
 MONGO_FTS_LANGUAGE_DECLARE(languageTurkishV1, "turkish", TEXT_INDEX_VERSION_1);
+MONGO_FTS_LANGUAGE_DECLARE(languageChineseV1, "chinese", TEXT_INDEX_VERSION_1);
 
 // static
 void FTSLanguage::registerLanguage(StringData languageName,
@@ -311,6 +314,9 @@ const FTSPhraseMatcher& BasicFTSLanguage::getPhraseMatcher() const {
 }
 
 std::unique_ptr<FTSTokenizer> UnicodeFTSLanguage::createTokenizer() const {
+    if (str() == "chinese") {
+        return stdx::make_unique<ChineseFTSTokenizer>(this);
+    }
     return stdx::make_unique<UnicodeFTSTokenizer>(this);
 }
 
