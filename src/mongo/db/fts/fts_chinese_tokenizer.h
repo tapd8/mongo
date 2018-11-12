@@ -6,7 +6,7 @@
 #include "mongo/db/fts/stemmer.h"
 #include "mongo/db/fts/tokenizer.h"
 #include "mongo/db/fts/unicode/string.h"
-#include "mongo/db/fts/mmseg/mmseg.h"
+#include "mongo/db/fts/jieba/Jieba.hpp"
 
 namespace mongo {
 namespace fts {
@@ -27,7 +27,7 @@ public:
     StringData get() const override;
 
 private:
-	std::list<std::u16string> split(const StringData& doc);
+    std::list<std::string> split(const StringData& doc);
     const FTSLanguage* const _language;
 
     // const StopWords* const _stopWords;
@@ -35,8 +35,8 @@ private:
     // const unicode::CaseFoldMode _caseFoldMode;
 
     std::string _document;
-	std::string _stem;
-	std::list<std::u16string> _words;
+    std::string _stem;
+    std::list<std::string> _words;
 };
 
 }  // namespace fts

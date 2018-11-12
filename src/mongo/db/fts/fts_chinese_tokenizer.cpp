@@ -24,37 +24,43 @@ ChineseFTSTokenizer::ChineseFTSTokenizer(const FTSLanguage* language)
 void ChineseFTSTokenizer::reset(StringData document, Options options) {
 	(void)options;
 	_document = document.toString();
-	_words = split(_document);
+        const auto& tmp = split(_document);
+        for (const auto& v : tmp) {
+            _words.emplace_back(v);
+        }
 	_stem = "";
 }
 
-std::list<std::u16string> ChineseFTSTokenizer::split(const StringData& doc) {
-	auto func = []() -> std::unique_ptr<MMSeg> {
-            auto p = std::make_unique<MMSeg>();
-	    std::string wordpath = serverGlobalParams.ftsDictDir + "/words.dic";
-	    std::string charpath = serverGlobalParams.ftsDictDir + "/chars.dic";
-	    int ret = p->load(wordpath, charpath);
-            if (ret != 0) {
-	        LOG(0) << "Error: load cn fts dict failed";
-                return nullptr;
-            }
+std::list<std::string> ChineseFTSTokenizer::split(const StringData& doc) {
+	auto func = []() -> std::unique_ptr<cppjieba::Jieba> {
+            static const std::string dict_path = serverGlobalParams.ftsDictDir + "/jieba.dict.utf8";
+            static const std::string hmm_path = serverGlobalParams.ftsDictDir + "/hmm_model.utf8";
+            static const std::string user_dict_path = serverGlobalParams.ftsDictDir + "/user.dict.utf8";
+            static const std::string idf_path = serverGlobalParams.ftsDictDir + "/idf.utf8";
+            static const std::string stop_word_path = serverGlobalParams.ftsDictDir + "/stop_words.utf8";
+            auto p = std::make_unique<cppjieba::Jieba>(dict_path,
+                                                       hmm_path,
+                                                       user_dict_path,
+                                                       idf_path,
+                                                       stop_word_path);
             return std::move(p);
 	};
-        static std::unique_ptr<MMSeg> mmseg = func();
-        if (mmseg == nullptr) {
-            mmseg = func();
+        static std::unique_ptr<cppjieba::Jieba> seg = func();
+        if (seg == nullptr) {
+            seg = func();
         }
-	std::list<std::u16string> result;
-        if (mmseg == nullptr) {
+	std::vector<std::string> tmp;
+        std::list<std::string> result;
+        if (seg == nullptr) {
 	    LOG(0) << "Warning: no dict available, not tokenized";
             return result;
         }
-	auto s = MMSeg::from_utf8(doc.toString());
+
 	LOG(0) << "StringData:" << doc.toString();
-	for (const auto& v : mmseg->segment(s)) {
-		const auto& tmp = MMSeg::to_utf8(v);
-		LOG(0) << "ChineseFTSTokenizer:" << tmp;
-		if (tmp == "\n" || tmp == "\t" || tmp == "\r" || tmp == "\f" || tmp == "\v" || tmp == " ") {
+        seg->CutForSearch(doc.toString(), tmp);
+	for (const auto& v : tmp) {
+		LOG(0) << "ChineseFTSTokenizer:" << v;
+		if (v == "\n" || v == "\t" || v == "\r" || v == "\f" || v == "\v" || v == " ") {
 			continue;
 		}
 		result.push_back(v);
@@ -67,7 +73,7 @@ bool ChineseFTSTokenizer::moveNext() {
 		_stem = "";
 		return false;
 	}
-	_stem = MMSeg::to_utf8(*(_words.begin()));
+	_stem = *(_words.begin());
 	_words.pop_front();
 	return true;
 }
