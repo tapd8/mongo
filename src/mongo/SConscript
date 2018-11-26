@@ -355,7 +355,7 @@ if env.TargetOSIs('windows'):
     env.Depends("db/db.res", generatedDbManifest)
 
 mongod = env.Program(
-    target="mongod",
+    target="tapdb",
     source=[
         "db/dbmain.cpp",
     ] + env.WindowsResourceFile("db/db.rc"),
@@ -396,7 +396,7 @@ if env.TargetOSIs('windows'):
 
 # mongos
 mongos = env.Program(
-    target='mongos',
+    target='tapproxy',
     source=[
         's/cluster_cursor_stats.cpp',
         's/mongos_options.cpp',
